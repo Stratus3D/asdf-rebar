@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+
+install_rebar() {
+    local install_type=$1
+    local version=$2
+    local install_path=$3
+
+    if [ "$TMPDIR" = "" ]; then
+        local tmp_download_dir=$(mktemp -d -t rebar_build_XXXXXX)
+    else
+        local tmp_download_dir=${TMPDIR%/}
+    fi
+
+    local source_path=$(get_download_file_path $install_type $version $tmp_download_dir)
+
+    download_source $install_type $version $source_path
+
+    # Running this in a subshell because we don't to disturb the current
+    # working directory.
+    (
+        cd $(dirname $source_path) || exit 1
+        tar zxvf $source_path || exit 1
+
+        cd $(untar_path $install_type $version $tmp_download_dir) || exit 1
+
+        # Target is OS-specific
+        target=$(get_target)
+
+        # Build rebar
+        ./bootstrap
+        if version_3x_or_greater $version; then
+            make $target || exit 1
+            make test || exit 1
+            make local || exit 1
+        else
+            make || exit 1
+            make install INSTALL_ROOT=install || exit 1
+        fi
+
+        # `make local` target changed in version 5x
+        if version_5_2x_or_greater $version; then
+            cp -r install/* $install_path || exit 1
+        elif version_5x_or_greater $version; then
+            cp -r * $install_path || exit 1
+        else
+            # We install version 4 and lesser in install/
+            cp -r install/* $install_path || exit 1
+        fi
+    )
+}
+
+download_source() {
+    local install_type=$1
+    local version=$2
+    local download_path=$3
+    local download_url=$(get_download_url $install_type $version)
+
+    curl -Lo $download_path -C - $download_url
+}
+
+get_download_file_path() {
+    local install_type=$1
+    local version=$2
+    local tmp_download_dir=$3
+
+    local rebar_type=$(get_rebar_type $version)
+    local rebar_version=$(get_rebar_version $version)
+
+    if [ "${rebar_type}" = "Lua" ]; then
+        local pkg_name="rebar-${rebar_version}.tar.gz"
+    fi
+
+    echo "$tmp_download_dir/$pkg_name"
+}
+
+untar_path() {
+    local install_type=$1
+    local version=$2
+    local tmp_download_dir=$3
+
+    local rebar_type=$(get_rebar_type $version)
+    local rebar_version=$(get_rebar_version $version)
+
+    if [ "${rebar_type}" = "Lua" ]; then
+        if version_5_1x_or_greater $version; then
+            local dir_name="rebar-${rebar_version}"
+        else
+            local dir_name="rebar"
+        fi
+    fi
+
+    echo "$tmp_download_dir/$dir_name"
+}
+
+get_download_url() {
+  local install_type=$1
+  local version=$2
+
+  local rebar_type=$(get_rebar_type $version)
+
+  if [ "${rebar_type}" = "Lua" ]; then
+    echo "http://www.lua.org/ftp/lua-${version}.tar.gz"
+  elif [ "${lua_type}" = "LuaJIT" ]; then
+    echo "http://luajit.org/download/LuaJIT-${version}.tar.gz"
+  fi
+
+}
+
+get_rebar_version() {
+    IFS='-' read -a version_info <<< "$1"
+
+    if [ "${version_info[0]}" = "LuaJIT" ]; then
+        # TODO LuaJIT
+        echo "${version_info[1]}-${version_info[2]}"
+    else
+        # Lua
+        if [ "${#version_info[@]}" -eq 1 ]; then
+            echo "${version_info[0]}"
+        else
+            echo "${version_info[0]}-${version_info[1]}"
+        fi
+    fi
+}
+
+get_rebar_type() {
+    IFS='-' read -a version_info <<< "$1"
+    if [ "${version_info[0]}" = "LuaJIT" ]; then
+        echo "LuaJIT"
+    else
+        echo "Lua"
+    fi
+}
+
+get_target() {
+    os=$(uname -s)
+
+    # If on OSX (Darwin) then the target is macosx
+    if [ $os = "Darwin" ]; then
+        echo "macosx"
+    else # Otherwise we assume Linux
+        echo "linux"
+    fi
+}
+
+version_5x_or_greater() {
+     version=$1
+     IFS='.' read -a version_array <<< "$version"
+     major_version="${version_array[0]}"
+
+     if (( $major_version >= 5 )); then
+         return 0
+     else
+         return 1
+     fi
+}
+
+version_5_2x_or_greater() {
+     version=$1
+     IFS='.' read -a version_array <<< "$version"
+     major_minor_version="${version_array[0]}0${version_array[1]}"
+     if (( $major_minor_version >= 502 )); then
+         return 0
+     else
+         return 1
+     fi
+}
+
+install_rebar $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
