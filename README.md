@@ -23,7 +23,7 @@ Check the [asdf](https://github.com/HashNuke/asdf) readme for instructions on ho
 To modify this plugin into your `asdf` installation and see changes live, just create a symlink:
 
 ```
-ln -s . ~/.asdf/plugins/rebar
+ln -s $(pwd) ~/.asdf/plugins/rebar
 ```
 
 ## Contributing
