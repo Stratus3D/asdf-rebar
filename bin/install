@@ -19,14 +19,16 @@ install_rebar() {
     # working directory.
     (
         cd $(dirname $source_path) || exit 1
-        tar zxvf $source_path || exit 1
+        tar zxvf $source_path &> /dev/null || exit 1
 
         cd $(untar_path $install_type $version $tmp_download_dir) || exit 1
 
         # Build rebar
         ./bootstrap
 
-        cp rebar $install_path/bin || exit 1
+        # Copy rebar into the bin directory inside the asdf install directory
+        mkdir -p $install_path/bin/ || exit 1
+        cp rebar $install_path/bin/ || exit 1
     )
 }
 
@@ -36,7 +38,6 @@ download_source() {
     local download_path=$3
     local download_url=$(get_download_url $install_type $version)
 
-    echo $download_url
     curl -Lo $download_path -C - $download_url
 }
 
@@ -47,7 +48,7 @@ get_download_file_path() {
 
     local rebar_version=$(get_rebar_version $version)
 
-    local pkg_name="rebar-${rebar_version}.tar.gz"
+    local pkg_name="${rebar_version}.tar.gz"
 
     echo "$tmp_download_dir/$pkg_name"
 }
@@ -59,11 +60,11 @@ untar_path() {
 
     local rebar_version=$(get_rebar_version $version)
 
-    if [ "${rebar_type}" = "Lua" ]; then
-        if version_5_1x_or_greater $version; then
-            local dir_name="rebar-${rebar_version}"
+    if [ "${install_type}" = "version" ]; then
+        if version_3x_or_greater $version; then
+            local dir_name="rebar-${version}"
         else
-            local dir_name="rebar"
+            local dir_name="rebar-${version}"
         fi
     fi
 
@@ -96,7 +97,6 @@ version_3x_or_greater() {
      version=$1
      IFS='.' read -a version_array <<< "$version"
      major_version="${version_array[0]}"
-     echo $major_version
 
      if (( $major_version >= 3 )); then
          return 0
