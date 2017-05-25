@@ -28,7 +28,12 @@ install_rebar() {
 
         # Copy rebar into the bin directory inside the asdf install directory
         mkdir -p $install_path/bin/ || exit 1
-        cp rebar $install_path/bin/ || exit 1
+
+        if version_3x_or_greater $version; then
+            cp _build/default/bin/rebar3 $install_path/bin/ || exit 1
+        else
+            cp rebar $install_path/bin/ || exit 1
+        fi
     )
 }
 
@@ -62,7 +67,7 @@ untar_path() {
 
     if [ "${install_type}" = "version" ]; then
         if version_3x_or_greater $version; then
-            local dir_name="rebar-${version}"
+            local dir_name="rebar3-${version}"
         else
             local dir_name="rebar-${version}"
         fi
