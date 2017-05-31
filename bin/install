@@ -24,7 +24,7 @@ install_rebar() {
         cd $(untar_path $install_type $version $tmp_download_dir) || exit 1
 
         # Build rebar
-        ./bootstrap
+        ./bootstrap || exit 1
 
         # Copy rebar into the bin directory inside the asdf install directory
         mkdir -p $install_path/bin/ || exit 1
