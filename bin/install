@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -x
 
 install_rebar() {
     local install_type=$1
