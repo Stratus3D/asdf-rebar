@@ -32,7 +32,7 @@ install_rebar() {
         if version_3x_or_greater $version; then
             local rebar3_binary="_build/default/bin/rebar3"
 
-            if [ ! -f rebar3_binary ]; then
+            if [ ! -f $rebar3_binary ]; then
                 rebar3_binary="_build/prod/bin/rebar3"
             fi
 
