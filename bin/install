@@ -30,7 +30,13 @@ install_rebar() {
         mkdir -p $install_path/bin/ || exit 1
 
         if version_3x_or_greater $version; then
-            cp _build/default/bin/rebar3 $install_path/bin/ || exit 1
+            local rebar3_binary="_build/default/bin/rebar3"
+
+            if [ ! -f $rebar3_binary ]; then
+                rebar3_binary="_build/prod/bin/rebar3"
+            fi
+
+            cp $rebar3_binary $install_path/bin/ || exit 1
         else
             cp rebar $install_path/bin/ || exit 1
         fi
