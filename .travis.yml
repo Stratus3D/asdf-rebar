@@ -1,11 +1,7 @@
-language: c
+language: erlang
+otp_release:
+  - 18.2.1
 script: asdf plugin-test rebar https://github.com/Stratus3D/asdf-rebar.git
-before_script:
-  - git clone https://github.com/asdf-vm/asdf.git
-  - . asdf/asdf.sh
-  - asdf plugin-add erlang https://github.com/asdf-vm/asdf-erlang.git
-  - asdf install erlang 18.3
-  - cd ~; asdf local erlang 18.3 
 os:
   - linux
   - osx
