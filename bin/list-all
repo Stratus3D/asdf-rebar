@@ -57,4 +57,4 @@ function sort_versions() {
 }
 
 # Fetch all tag names, and get only second column. Then remove all unnecesary characters.
-echo "$rebar2_versions $(get_rebar3_versions)" | sort_versions | tr '\n' ' '
+echo "$rebar2_versions $(get_rebar3_versions)" | sed '/^[a-zA-Z]/ d' | sort_versions | tr '\n' ' '
