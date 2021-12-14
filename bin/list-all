@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Unoffical Bash "strict mode"
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -euo pipefail
+#ORIGINAL_IFS=$IFS
+IFS=$'\t\n' # Stricter IFS settings
+
 rebar2_versions="
     2.0.0
     2.1.0
@@ -40,14 +46,16 @@ rebar2_versions="
 "
 
 get_rebar3_versions() {
-  local releases_path=https://api.github.com/repos/erlang/rebar3/releases
-  local cmd="curl -s"
+  local releases_path="https://api.github.com/repos/erlang/rebar3/releases"
+  local cmd=(curl -s)
 
-  if [ -n "$OAUTH_TOKEN" ]; then
-    cmd="$cmd -H 'Authorization: token $OAUTH_TOKEN'"
+  if [ -n "${OAUTH_TOKEN:-}" ]; then
+    cmd+=(-H "Authorization: token $OAUTH_TOKEN")
   fi
 
-  $cmd $releases_path | grep -oE "tag_name\": \".{1,15}\"," | sed 's/tag_name\": \"//;s/\",//'
+  cmd+=($releases_path)
+
+  ${cmd[@]} | grep -oE "tag_name\": \".{1,20}\"," | sed 's/tag_name\": \"//;s/\",//'
 }
 
 # stolen from https://github.com/rbenv/ruby-build/pull/631/files#diff-fdcfb8a18714b33b07529b7d02b54f1dR942
@@ -56,5 +64,9 @@ function sort_versions() {
     LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
 }
 
-# Fetch all tag names, and get only second column. Then remove all unnecesary characters.
-echo "$rebar2_versions $(get_rebar3_versions)" | sed '/^[a-zA-Z]/ d' | sort_versions | tr '\n' ' '
+# Fetch all tags names
+all_versions="$(printf "%s\n%s" "$rebar2_versions" "$(get_rebar3_versions)")"
+
+# Remove all unnecessary characters and sort semantic versions, then make single
+# line out
+printf "%s" "$all_versions" | sed '/^[a-zA-Z]/ d' | sort_versions | tr '\n' ' '
