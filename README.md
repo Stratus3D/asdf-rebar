@@ -12,6 +12,8 @@ Rebar3/Rebar plugin for [asdf version manager](https://github.com/HashNuke/asdf)
 
 ```
 asdf plugin-add rebar https://github.com/Stratus3D/asdf-rebar.git
+
+asdf install rebar latest
 ```
 
 ## Use
