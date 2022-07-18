@@ -25,7 +25,7 @@ jobs:
 
       - name: Install system packages on macOS
         if: ${{ runner.os == 'macOS' }}
-        run: brew install coreutils
+        run: brew install coreutils erlang
 
       - name: Test plugin
         uses: asdf-vm/actions/plugin-test@v1
