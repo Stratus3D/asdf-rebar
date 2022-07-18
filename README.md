@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/Stratus3D/asdf-rebar.svg?branch=master)](https://travis-ci.org/Stratus3D/asdf-rebar)
 [![Build Status](https://github.com/Stratus3D/asdf-rebar/actions/workflows/workflow.yml/badge.svg)](https://github.com/Stratus3D/asdf-rebar/actions/workflows/workflow.yml)
-node
 
 Rebar3/Rebar plugin for [asdf version manager](https://github.com/HashNuke/asdf) based off of scripts in my [dotfiles repository](https://github.com/Stratus3D/dotfiles).
 
