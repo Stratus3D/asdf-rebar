@@ -1,13 +1,23 @@
 name: Main workflow
 
 on:
-  workflow_dispatch:
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths-ignore:
+      - "**.md"
   push:
+    branches:
+      - main
+    paths-ignore:
+      - "**.md"
 
 jobs:
   plugin_test:
     strategy:
+      fail-fast: false
       matrix:
         os:
           - macos-latest
@@ -16,12 +26,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
       - name: Install system packages on Ubuntu
         if: ${{ runner.os == 'Linux' }}
-        run: sudo apt-get install curl
+        run: sudo apt-get install curl erlang
 
       - name: Install system packages on macOS
         if: ${{ runner.os == 'macOS' }}
@@ -31,3 +38,26 @@ jobs:
         uses: asdf-vm/actions/plugin-test@v1
         with:
           command: rebar3 --version
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run ShellCheck
+        run: shellcheck bin/*
+
+  format:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install shfmt
+        run: brew install shfmt
+
+      - name: Run shfmt
+        run: shfmt -i 2 -d .
