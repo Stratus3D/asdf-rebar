@@ -53,9 +53,9 @@ get_rebar3_versions() {
     cmd+=(-H "Authorization: token $OAUTH_TOKEN")
   fi
 
-  cmd+=($releases_path)
+  cmd+=("$releases_path")
 
-  ${cmd[@]} | grep -oE "tag_name\": \".{1,20}\"," | sed 's/tag_name\": \"//;s/\",//'
+  "${cmd[@]}" | grep -oE "tag_name\": \".{1,20}\"," | sed 's/tag_name\": \"//;s/\",//'
 }
 
 # stolen from https://github.com/rbenv/ruby-build/pull/631/files#diff-fdcfb8a18714b33b07529b7d02b54f1dR942

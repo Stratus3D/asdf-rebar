@@ -10,41 +10,43 @@ install_rebar() {
     local install_type=$1
     local version=$2
     local install_path=$3
+    local tmp_download_dir
+    local source_path
 
     if [ "${TMPDIR:-}" = "" ]; then
-        local tmp_download_dir=$(mktemp -d -t rebar_build_XXXXXX)
+        tmp_download_dir="$(mktemp -d -t rebar_build_XXXXXX)"
     else
-        local tmp_download_dir=${TMPDIR%/}
+        tmp_download_dir="${TMPDIR%/}"
     fi
 
-    local source_path=$(get_download_file_path $install_type $version $tmp_download_dir)
+    source_path="$(get_download_file_path "$install_type" "$version" "$tmp_download_dir")"
 
-    download_source $install_type $version $source_path || exit 1
+    download_source "$install_type" "$version" "$source_path" || exit 1
 
     # Running this in a subshell because we don't to disturb the current
     # working directory.
     (
-        cd $(dirname $source_path) || exit 1
-        tar zxvf $source_path &> /dev/null || exit 1
+        cd "$(dirname "$source_path")" || exit 1
+        tar zxvf "$source_path" &> /dev/null || exit 1
 
-        cd $(untar_path $install_type $version $tmp_download_dir) || exit 1
+        cd "$(untar_path "$install_type" "$version" "$tmp_download_dir")" || exit 1
 
         # Build rebar
         ./bootstrap || exit 1
 
         # Copy rebar into the bin directory inside the asdf install directory
-        mkdir -p $install_path/bin/ || exit 1
+        mkdir -p "$install_path/bin/" || exit 1
 
-        if version_3x_or_greater $version; then
+        if version_3x_or_greater "$version"; then
             local rebar3_binary="_build/default/bin/rebar3"
 
             if [ ! -f $rebar3_binary ]; then
                 rebar3_binary="_build/prod/bin/rebar3"
             fi
 
-            cp $rebar3_binary $install_path/bin/ || exit 1
+            cp "$rebar3_binary" "$install_path/bin/" || exit 1
         else
-            cp rebar $install_path/bin/ || exit 1
+            cp rebar "$install_path/bin/" || exit 1
         fi
     )
 }
@@ -53,17 +55,20 @@ download_source() {
     local install_type=$1
     local version=$2
     local download_path=$3
-    local download_url=$(get_download_url $install_type $version)
+    local download_url
 
-    curl -Lo $download_path $download_url
+    download_url="$(get_download_url "$install_type" "$version")"
+
+    curl -Lo "$download_path" "$download_url"
 }
 
 get_download_file_path() {
     local install_type=$1
     local version=$2
     local tmp_download_dir=$3
+    local rebar_version
 
-    local rebar_version=$(get_rebar_version $version)
+    rebar_version="$(get_rebar_version "$version")"
 
     local pkg_name="${rebar_version}.tar.gz"
 
@@ -74,14 +79,16 @@ untar_path() {
     local install_type=$1
     local version=$2
     local tmp_download_dir=$3
+    local rebar_version
+    local dir_name
 
-    local rebar_version=$(get_rebar_version $version)
+    rebar_version=$(get_rebar_version "$version")
 
     if [ "${install_type}" = "version" ]; then
-        if version_3x_or_greater $version; then
-            local dir_name="rebar3-${version}"
+        if version_3x_or_greater "$version"; then
+            dir_name="rebar3-${version}"
         else
-            local dir_name="rebar-${version}"
+            dir_name="rebar-${version}"
         fi
     fi
 
@@ -100,7 +107,7 @@ get_download_url() {
 }
 
 get_rebar_version() {
-    IFS='-' read -a version_info <<< "$1"
+    IFS='-' read -ra version_info <<< "$1"
 
     # Lua
     if [ "${#version_info[@]}" -eq 1 ]; then
@@ -112,14 +119,14 @@ get_rebar_version() {
 
 version_3x_or_greater() {
      version=$1
-     IFS='.' read -a version_array <<< "$version"
+     IFS='.' read -ra version_array <<< "$version"
      major_version="${version_array[0]}"
 
-     if (( $major_version >= 3 )); then
+     if (( major_version >= 3 )); then
          return 0
      else
          return 1
      fi
 }
 
-install_rebar $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
+install_rebar "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
