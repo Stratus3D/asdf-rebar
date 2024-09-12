@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: Install system packages on Ubuntu
         if: ${{ runner.os == 'Linux' }}
-        run: sudo apt-get install curl erlang
+        run: sudo apt-get -y update && sudo apt-get -y install curl erlang
 
       - name: Install system packages on macOS
         if: ${{ runner.os == 'macOS' }}
@@ -38,6 +38,7 @@ jobs:
         uses: asdf-vm/actions/plugin-test@v1
         with:
           command: rebar3 --version
+          version: 3.22.0
 
   lint:
     runs-on: ubuntu-latest
