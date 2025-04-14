@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/Stratus3D/asdf-rebar.svg?branch=master)](https://travis-ci.org/Stratus3D/asdf-rebar)
 [![Build Status](https://github.com/Stratus3D/asdf-rebar/actions/workflows/workflow.yml/badge.svg)](https://github.com/Stratus3D/asdf-rebar/actions/workflows/workflow.yml)
 
-Rebar3/Rebar plugin for [asdf version manager](https://github.com/HashNuke/asdf) based off of scripts in my [dotfiles repository](https://github.com/Stratus3D/dotfiles).
+Rebar3/Rebar plugin for [asdf version manager](https://github.com/asdf-vm/asdf) based off of scripts in my [dotfiles repository](https://github.com/Stratus3D/dotfiles).
 
 ## Dependencies
 
@@ -12,12 +12,12 @@ Rebar3/Rebar plugin for [asdf version manager](https://github.com/HashNuke/asdf)
 ## Install
 
 ```
-asdf plugin-add rebar https://github.com/Stratus3D/asdf-rebar.git
+asdf plugin add rebar https://github.com/Stratus3D/asdf-rebar.git
 ```
 
 ## Use
 
-Check the [asdf](https://github.com/HashNuke/asdf) readme for instructions on how to install & manage versions of Rebar3.
+Check the [asdf](https://github.com/asdf-vm/asdf) readme for instructions on how to install & manage versions of Rebar3.
 
 ## Development
 
